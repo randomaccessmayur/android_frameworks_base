@@ -31,6 +31,7 @@ import static android.os.BatteryManager.EXTRA_DASH_CHARGER;
 import static android.os.BatteryManager.EXTRA_WARP_CHARGER;
 import static android.os.BatteryManager.EXTRA_VOOC_CHARGER;
 import static android.os.BatteryManager.EXTRA_SMART_CHARGER;
+import static android.os.BatteryManager.EXTRA_SUPERDART_CHARGER;
 
 import android.content.Context;
 import android.content.Intent;
@@ -53,6 +54,7 @@ public class BatteryStatus {
     public static final int CHARGING_WARP = 4;
     public static final int CHARGING_VOOC = 5;
     public static final int CHARGING_SMART = 6;
+    public static final int CHARGING_SUPERDART = 7;
 
     public final int status;
     public final int level;
@@ -65,10 +67,11 @@ public class BatteryStatus {
     public final boolean warpChargeStatus;
     public final boolean voocChargeStatus;
     public final boolean smartChargeStatus;
+    public final boolean superdartChargeStatus;
 
     public BatteryStatus(int status, int level, int plugged, int health,
             int maxChargingWattage, boolean present, boolean dashChargeStatus,
-            boolean warpChargeStatus, boolean voocChargeStatus, boolean smartChargeStatus) {
+            boolean warpChargeStatus, boolean voocChargeStatus, boolean smartChargeStatus, boolean superdartChargeStatus) {
         this.status = status;
         this.level = level;
         this.plugged = plugged;
@@ -80,6 +83,7 @@ public class BatteryStatus {
         this.warpChargeStatus = warpChargeStatus;
         this.voocChargeStatus = voocChargeStatus;
         this.smartChargeStatus = smartChargeStatus;
+        this.superdartChargeStatus = superdartChargeStatus;
     }
 
     public BatteryStatus(Intent batteryChangedIntent) {
@@ -93,6 +97,7 @@ public class BatteryStatus {
         warpChargeStatus = batteryChangedIntent.getBooleanExtra(EXTRA_WARP_CHARGER, false);
         voocChargeStatus = batteryChangedIntent.getBooleanExtra(EXTRA_VOOC_CHARGER, false);
         smartChargeStatus = batteryChangedIntent.getBooleanExtra(EXTRA_SMART_CHARGER, false);
+        superdartChargeStatus = batteryChangedIntent.getBooleanExtra(EXTRA_SUPERDART_CHARGER, false);
 
         final int maxChargingMicroAmp = batteryChangedIntent.getIntExtra(EXTRA_MAX_CHARGING_CURRENT,
                 -1);
@@ -175,6 +180,7 @@ public class BatteryStatus {
                 warpChargeStatus ? CHARGING_WARP :
                 voocChargeStatus ? CHARGING_VOOC :
                 smartChargeStatus ? CHARGING_SMART :
+                superdartChargeStatus ? CHARGING_SUPERDART :
                 maxChargingWattage <= 0 ? CHARGING_UNKNOWN :
                 maxChargingWattage < slowThreshold ? CHARGING_SLOWLY :
                         maxChargingWattage > fastThreshold ? CHARGING_FAST :

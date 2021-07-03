@@ -197,6 +197,10 @@ public final class BatteryService extends SystemService {
     private boolean mSmartCharger;
     private boolean mLastSmartCharger;
 
+    private boolean mSuperdartCharger;
+    private boolean mHasSuperdartCharger;
+    private boolean mLastSuperdartCharger;
+
     private long mDischargeStartTime;
     private int mDischargeStartLevel;
 
@@ -663,6 +667,7 @@ public final class BatteryService extends SystemService {
         mDashCharger = mHasDashCharger && isDashCharger() && !isSmartCharger();
         mWarpCharger = mHasWarpCharger && isDashCharger() && !isSmartCharger();
         mVoocCharger = isVoocCharger() && !isSmartCharger();
+        mSuperdartCharger = mHasSuperdartCharger && isSuperdartCharger() && !isSmartCharger();
         mSmartCharger = isSmartCharger();
 
         if (force || (mHealthInfo.batteryStatus != mLastBatteryStatus ||
@@ -684,6 +689,7 @@ public final class BatteryService extends SystemService {
                 mDashCharger != mLastDashCharger ||
                 mWarpCharger != mLastWarpCharger ||
                 mVoocCharger != mLastVoocCharger ||
+                mSuperdartCharger != mLastSuperdartCharger ||
                 mSmartCharger != mLastSmartCharger)) {
 
             if (mPlugType != mLastPlugType) {
@@ -863,6 +869,7 @@ public final class BatteryService extends SystemService {
             mLastDashCharger = mDashCharger;
             mLastWarpCharger = mWarpCharger;
             mLastVoocCharger = mVoocCharger;
+            mLastSuperdartCharger = mSuperdartCharger;
             mLastSmartCharger = mSmartCharger;
         }
     }
@@ -900,6 +907,7 @@ public final class BatteryService extends SystemService {
         intent.putExtra(BatteryManager.EXTRA_DASH_CHARGER, mDashCharger);
         intent.putExtra(BatteryManager.EXTRA_WARP_CHARGER, mWarpCharger);
         intent.putExtra(BatteryManager.EXTRA_VOOC_CHARGER, mVoocCharger);
+        intent.putExtra(BatteryManager.EXTRA_SUPERDART_CHARGER, mSuperdartCharger);
         intent.putExtra(BatteryManager.EXTRA_SMART_CHARGER, mSmartCharger);
         if (DEBUG) {
             Slog.d(TAG, "Sending ACTION_BATTERY_CHANGED. scale:" + BATTERY_SCALE
@@ -987,6 +995,20 @@ public final class BatteryService extends SystemService {
     }
 
     private boolean isVoocCharger() {
+        try {
+            FileReader file = new FileReader("/sys/class/power_supply/battery/voocchg_ing");
+            BufferedReader br = new BufferedReader(file);
+            String state = br.readLine();
+            br.close();
+            file.close();
+            return "1".equals(state);
+        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
+        }
+        return false;
+    }
+
+    private boolean isSuperdartCharger() {
         try {
             FileReader file = new FileReader("/sys/class/power_supply/battery/voocchg_ing");
             BufferedReader br = new BufferedReader(file);
